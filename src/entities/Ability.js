@@ -59,18 +59,59 @@ class Ability {
 
     fireProjectiles() {
         const count = this.data.count;
-        const angleStep = (Math.PI * 2) / count;
-        const startAngle = Math.random() * Math.PI * 2;
 
-        for (let i = 0; i < count; i++) {
-            const angle = startAngle + angleStep * i;
-            const projectile = this.projectiles.get(this.player.x, this.player.y, this.data);
+        // Get active enemies and sort by distance
+        const enemies = this.scene.enemies.getChildren().filter(e => e.active);
 
-            if (projectile) {
-                projectile.fire(angle);
+        if (enemies.length > 0) {
+            // Target nearest enemies when available
+            enemies.sort((a, b) => {
+                const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                return distA - distB;
+            });
 
-                // Visual effect
-                this.createMuzzleFlash(angle);
+            // Fire at closest enemies
+            for (let i = 0; i < Math.min(count, enemies.length); i++) {
+                const target = enemies[i];
+                const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, target.x, target.y);
+                const projectile = this.projectiles.get(this.player.x, this.player.y, this.data);
+
+                if (projectile) {
+                    projectile.fire(angle);
+                    this.createMuzzleFlash(angle);
+                }
+            }
+
+            // If we have more projectiles than enemies, fill remaining slots with evenly spaced shots
+            if (count > enemies.length) {
+                const remaining = count - enemies.length;
+                const angleStep = (Math.PI * 2) / remaining;
+                const startAngle = Math.random() * Math.PI * 2;
+
+                for (let i = 0; i < remaining; i++) {
+                    const angle = startAngle + angleStep * i;
+                    const projectile = this.projectiles.get(this.player.x, this.player.y, this.data);
+
+                    if (projectile) {
+                        projectile.fire(angle);
+                        this.createMuzzleFlash(angle);
+                    }
+                }
+            }
+        } else {
+            // No enemies - fire in evenly spaced circle pattern
+            const angleStep = (Math.PI * 2) / count;
+            const startAngle = Math.random() * Math.PI * 2;
+
+            for (let i = 0; i < count; i++) {
+                const angle = startAngle + angleStep * i;
+                const projectile = this.projectiles.get(this.player.x, this.player.y, this.data);
+
+                if (projectile) {
+                    projectile.fire(angle);
+                    this.createMuzzleFlash(angle);
+                }
             }
         }
     }

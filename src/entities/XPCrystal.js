@@ -68,12 +68,23 @@ class XPCrystal extends Phaser.Physics.Arcade.Sprite {
     }
 
     collect() {
-        // Particle effect on collection
-        this.scene.add.particles(this.x, this.y, 'xpCrystal', {
+        // Mark as inactive immediately
+        this.setActive(false);
+        this.setVisible(false);
+
+        // Particle effect on collection with auto-cleanup
+        const particles = this.scene.add.particles(this.x, this.y, 'xpCrystal', {
             speed: { min: 20, max: 50 },
             scale: { start: 0.5, end: 0 },
             lifespan: 300,
             quantity: 5,
+        });
+
+        // Destroy particle emitter after particles finish
+        this.scene.time.delayedCall(400, () => {
+            if (particles) {
+                particles.destroy();
+            }
         });
 
         this.destroy();

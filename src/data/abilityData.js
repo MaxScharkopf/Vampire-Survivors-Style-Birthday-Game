@@ -12,16 +12,16 @@ const AbilityData = {
         type: 'projectile',
         damage: 10,
         projectileSpeed: 250,
-        cooldown: 2000, // milliseconds
+        cooldown: 1500, // milliseconds (faster for better feel)
         range: 400,
-        count: 1, // number of projectiles
+        count: 2, // number of projectiles (starts with 2 for easier gameplay)
         pierce: 1, // how many enemies it can hit
         color: 0x88CCFF,
 
         upgrades: [
             { level: 1, stat: 'damage', value: 15, description: '+5 damage' },
-            { level: 2, stat: 'count', value: 2, description: 'Fires 2 stars' },
-            { level: 3, stat: 'cooldown', value: 1500, description: 'Faster attacks' },
+            { level: 2, stat: 'count', value: 3, description: 'Fires 3 stars' },
+            { level: 3, stat: 'cooldown', value: 1200, description: 'Faster attacks' },
             { level: 4, stat: 'pierce', value: 2, description: 'Pierces 2 enemies' },
             { level: 5, stat: 'damage', value: 25, description: '+10 damage' },
         ],
