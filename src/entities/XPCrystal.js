@@ -41,30 +41,39 @@ class XPCrystal extends Phaser.Physics.Arcade.Sprite {
     update(time, player) {
         if (!this.active) return;
 
-        // Floating animation
-        this.floatOffset += 0.05;
-        this.y = this.baseY + Math.sin(this.floatOffset) * 3;
-
-        // Sparkle effect
-        this.sparkleTimer += 0.1;
-        const scale = 1 + Math.sin(this.sparkleTimer) * 0.1;
-        this.setScale(scale);
-
         // Magnetic pull towards player
         if (player && player.active) {
             const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
             const magnetRange = player.magnetRange || GameConfig.xp.magnetRange;
 
             if (distance < magnetRange) {
-                this.magnetized = true;
-                const speed = 300;
+                if (!this.magnetized) {
+                    this.magnetized = true;
+                    // Stop floating when magnetized
+                    this.baseY = this.y;
+                }
+
+                // Stronger magnetic pull as it gets closer
+                const pullStrength = 1 - (distance / magnetRange);
+                const speed = 300 + (pullStrength * 200); // 300-500 speed
+
                 const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
                 this.setVelocity(
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed
                 );
+            } else if (!this.magnetized) {
+                // Only float if not magnetized
+                this.floatOffset += 0.05;
+                this.y = this.baseY + Math.sin(this.floatOffset) * 3;
+                this.setVelocity(0, 0);
             }
         }
+
+        // Sparkle effect (always active)
+        this.sparkleTimer += 0.1;
+        const scale = 1 + Math.sin(this.sparkleTimer) * 0.1;
+        this.setScale(scale);
     }
 
     collect() {

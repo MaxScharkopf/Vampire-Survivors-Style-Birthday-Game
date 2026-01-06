@@ -24,8 +24,33 @@ class StoryScrollScene extends Phaser.Scene {
             this.showChapterScroll(this.scrollType);
         }
 
-        // Continue prompt
-        this.time.delayedCall(2000, () => {
+        // Allow skipping immediately (for people who read fast or have seen it before)
+        let canContinue = false;
+        this.time.delayedCall(1000, () => {
+            canContinue = true;
+        });
+
+        this.input.on('pointerdown', () => {
+            if (canContinue) {
+                this.continueToNextScene();
+            }
+        });
+
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (canContinue) {
+                this.continueToNextScene();
+            }
+        });
+
+        this.input.keyboard.on('keydown-ENTER', () => {
+            if (canContinue) {
+                this.continueToNextScene();
+            }
+        });
+
+        // Continue prompt - delayed to allow reading time
+        // Wait for all animations to complete (2s) plus reading time (3s more)
+        this.time.delayedCall(5000, () => {
             const continueText = this.add.text(width / 2, height - 60,
                 'Click anywhere to continue...',
                 {
@@ -36,6 +61,7 @@ class StoryScrollScene extends Phaser.Scene {
                 }
             );
             continueText.setOrigin(0.5);
+            continueText.setDepth(200);
 
             // Pulse animation
             this.tweens.add({
@@ -44,19 +70,6 @@ class StoryScrollScene extends Phaser.Scene {
                 duration: 1000,
                 yoyo: true,
                 repeat: -1,
-            });
-
-            // Click to continue
-            this.input.once('pointerdown', () => {
-                this.continueToNextScene();
-            });
-
-            // Space or Enter to continue
-            this.input.keyboard.once('keydown-SPACE', () => {
-                this.continueToNextScene();
-            });
-            this.input.keyboard.once('keydown-ENTER', () => {
-                this.continueToNextScene();
             });
         });
     }
@@ -197,6 +210,7 @@ class StoryScrollScene extends Phaser.Scene {
         if (this.textures.exists(photoKey)) {
             // Display the actual loaded photo
             photo = this.add.image(width / 2, photoY, photoKey);
+            photo.setDepth(10);
 
             // Scale to fit nicely (max 350x250 to leave room for text)
             const maxWidth = 350;
@@ -222,6 +236,7 @@ class StoryScrollScene extends Phaser.Scene {
                 borderWidth,
                 borderHeight
             );
+            photoBorder.setDepth(9);
         } else {
             // Fallback: Show placeholder if image didn't load
             photoBox = this.add.rectangle(width / 2, photoY, 300, 200, 0x000000, 0.3);
@@ -277,6 +292,10 @@ class StoryScrollScene extends Phaser.Scene {
     }
 
     continueToNextScene() {
+        // Prevent multiple calls
+        if (this.transitioning) return;
+        this.transitioning = true;
+
         this.cameras.main.fadeOut(500);
 
         this.time.delayedCall(500, () => {
