@@ -8,7 +8,7 @@ class StoryScrollScene extends Phaser.Scene {
         this.scrollType = data.scroll; // 'opening' or chapter id
         this.nextScene = data.nextScene;
         this.nextChapterId = data.chapterId;
-        this.player = data.player;
+        this.playerData = data.playerData; // Player stats to pass to next scene
     }
 
     create() {
@@ -187,23 +187,27 @@ class StoryScrollScene extends Phaser.Scene {
         narrative.setOrigin(0.5, 0);
 
         // Photo display
-        const photoY = 360;
+        const photoY = 350;
         const photoKey = 'photo_' + scroll.chapterId;
         let photo = null;
         let photoBorder = null;
         let photoBox = null;
+        let photoBottomY = photoY + 100; // Default bottom position
 
         if (this.textures.exists(photoKey)) {
             // Display the actual loaded photo
             photo = this.add.image(width / 2, photoY, photoKey);
 
-            // Scale to fit nicely (max 400x300)
-            const maxWidth = 400;
-            const maxHeight = 300;
+            // Scale to fit nicely (max 350x250 to leave room for text)
+            const maxWidth = 350;
+            const maxHeight = 250;
             const scaleX = maxWidth / photo.width;
             const scaleY = maxHeight / photo.height;
             const scale = Math.min(scaleX, scaleY, 1); // Don't upscale
             photo.setScale(scale);
+
+            // Calculate where photo ends
+            photoBottomY = photoY + (photo.displayHeight / 2);
 
             // Add decorative border around photo
             const borderPadding = 10;
@@ -230,10 +234,12 @@ class StoryScrollScene extends Phaser.Scene {
                 align: 'center',
             });
             photoText.setOrigin(0.5);
+            photoBottomY = photoY + 100;
         }
 
-        // Personal message
-        const message = this.add.text(width / 2, 490, scroll.personalMessage, {
+        // Personal message - positioned below photo with spacing
+        const messageY = photoBottomY + 30;
+        const message = this.add.text(width / 2, messageY, scroll.personalMessage, {
             fontSize: '16px',
             fontFamily: 'Georgia',
             color: GameConfig.colors.text,
@@ -277,8 +283,8 @@ class StoryScrollScene extends Phaser.Scene {
             if (this.nextScene === 'GameScene') {
                 this.scene.start('GameScene', {
                     chapterId: this.nextChapterId,
-                    player: this.player,
-                    continue: this.player !== undefined,
+                    playerData: this.playerData,
+                    continue: this.playerData !== undefined && this.playerData !== null,
                 });
             } else {
                 this.scene.start(this.nextScene);

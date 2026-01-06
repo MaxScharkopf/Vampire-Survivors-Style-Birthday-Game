@@ -7,6 +7,7 @@ class GameScene extends Phaser.Scene {
     init(data) {
         this.currentChapter = data.chapterId || 0;
         this.continueGame = data.continue || false;
+        this.playerData = data.playerData || null;
     }
 
     create() {
@@ -22,10 +23,14 @@ class GameScene extends Phaser.Scene {
         this.enemies = this.physics.add.group();
         this.xpCrystals = this.physics.add.group();
 
-        // Create player
-        if (!this.continueGame) {
-            this.player = new Player(this, 640, 360);
+        // Create player - always create fresh but restore stats if continuing
+        this.player = new Player(this, 640, 360);
+
+        // Restore player stats if continuing from previous chapter
+        if (this.continueGame && this.playerData) {
+            this.restorePlayerStats(this.playerData);
         }
+
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
         // Create spawn manager
@@ -303,6 +308,9 @@ class GameScene extends Phaser.Scene {
         // Celebrate!
         this.createVictoryEffect();
 
+        // Save player stats
+        const playerData = this.savePlayerStats();
+
         // Move to next chapter or victory
         this.time.delayedCall(2000, () => {
             if (this.currentChapter < GameConfig.chapters.length - 1) {
@@ -311,11 +319,63 @@ class GameScene extends Phaser.Scene {
                     scroll: this.currentChapter,
                     nextScene: 'GameScene',
                     chapterId: this.currentChapter + 1,
-                    player: this.player, // Carry over player stats
+                    playerData: playerData, // Carry over player stats
                 });
             } else {
                 // Victory!
                 this.scene.start('VictoryScene');
+            }
+        });
+    }
+
+    savePlayerStats() {
+        // Save all important player stats to pass between scenes
+        return {
+            level: this.player.level,
+            currentXP: this.player.currentXP,
+            xpNeeded: this.player.xpNeeded,
+            maxHealth: this.player.maxHealth,
+            currentHealth: this.player.currentHealth,
+            maxMana: this.player.maxMana,
+            currentMana: this.player.currentMana,
+            moveSpeed: this.player.moveSpeed,
+            healthRegen: this.player.healthRegen,
+            manaRegen: this.player.manaRegen,
+            magnetRange: this.player.magnetRange,
+            abilities: this.player.abilities.map(ability => ({
+                abilityId: ability.abilityId,
+                currentLevel: ability.currentLevel,
+            })),
+            abilityLevels: { ...this.player.abilityLevels },
+        };
+    }
+
+    restorePlayerStats(data) {
+        // Restore player stats from saved data
+        this.player.level = data.level;
+        this.player.currentXP = data.currentXP;
+        this.player.xpNeeded = data.xpNeeded;
+        this.player.maxHealth = data.maxHealth;
+        this.player.currentHealth = data.currentHealth;
+        this.player.maxMana = data.maxMana;
+        this.player.currentMana = data.currentMana;
+        this.player.moveSpeed = data.moveSpeed;
+        this.player.healthRegen = data.healthRegen;
+        this.player.manaRegen = data.manaRegen;
+        this.player.magnetRange = data.magnetRange;
+        this.player.abilityLevels = { ...data.abilityLevels };
+
+        // Restore abilities
+        // Clear starting ability
+        this.player.abilities = [];
+
+        // Re-unlock all abilities with their levels
+        data.abilities.forEach(abilityData => {
+            this.player.unlockAbility(abilityData.abilityId);
+
+            // Upgrade to saved level
+            for (let i = 0; i < abilityData.currentLevel; i++) {
+                this.player.upgradeAbility(abilityData.abilityId);
             }
         });
     }
