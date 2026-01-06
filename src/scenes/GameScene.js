@@ -187,25 +187,53 @@ class GameScene extends Phaser.Scene {
     setupCollisions() {
         // Player vs enemies (take damage)
         this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
-            player.takeDamage(enemy.damage * 0.1); // Damage per frame
-        });
-
-        // Player abilities vs enemies
-        this.player.abilities.forEach(ability => {
-            if (ability.projectiles) {
-                this.physics.add.overlap(ability.projectiles, this.enemies, (projectile, enemy) => {
-                    if (projectile.active && enemy.active) {
-                        enemy.takeDamage(projectile.damage);
-                        projectile.hit();
-                    }
-                });
+            if (player.active && enemy.active) {
+                player.takeDamage(enemy.damage * 0.1); // Damage per frame
             }
         });
 
         // Player vs XP crystals
         this.physics.add.overlap(this.player, this.xpCrystals, (player, crystal) => {
-            player.gainXP(crystal.xpValue);
-            crystal.collect();
+            if (player.active && crystal.active) {
+                player.gainXP(crystal.xpValue);
+                crystal.collect();
+            }
+        });
+
+        // Set up collision checking in update loop (but not creating new colliders)
+        this.collisionCheckEnabled = true;
+    }
+
+    checkAbilityCollisions() {
+        // Manual collision checking for abilities
+        // This is more efficient than creating hundreds of collision handlers
+        this.player.abilities.forEach(ability => {
+            if (ability.projectiles) {
+                const projectiles = ability.projectiles.getChildren();
+                const enemies = this.enemies.getChildren();
+
+                projectiles.forEach(projectile => {
+                    if (!projectile.active) return;
+
+                    enemies.forEach(enemy => {
+                        if (!enemy.active) return;
+
+                        // Check distance for collision
+                        const distance = Phaser.Math.Distance.Between(
+                            projectile.x, projectile.y,
+                            enemy.x, enemy.y
+                        );
+
+                        // Collision radius (projectile + enemy)
+                        const collisionDist = 16 + (enemy.displayWidth / 2);
+
+                        if (distance < collisionDist) {
+                            enemy.takeDamage(projectile.damage);
+                            projectile.hit();
+                        }
+                    });
+                });
+            }
         });
     }
 
@@ -219,18 +247,6 @@ class GameScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(enemy => {
             if (enemy.active) {
                 enemy.update(this.player);
-
-                // Update projectile collisions (need to re-setup as abilities can change)
-                this.player.abilities.forEach(ability => {
-                    if (ability.projectiles) {
-                        this.physics.overlap(ability.projectiles, enemy, (projectile, enemy) => {
-                            if (projectile.active && enemy.active) {
-                                enemy.takeDamage(projectile.damage);
-                                projectile.hit();
-                            }
-                        });
-                    }
-                });
             }
         });
 
@@ -240,6 +256,9 @@ class GameScene extends Phaser.Scene {
                 crystal.update(time, this.player);
             }
         });
+
+        // Check ability collisions manually
+        this.checkAbilityCollisions();
 
         // Update spawn manager
         this.spawnManager.update(delta);
