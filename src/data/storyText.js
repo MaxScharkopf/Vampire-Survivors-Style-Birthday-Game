@@ -3,15 +3,15 @@
 
 const StoryData = {
     // Game title and intro
-    gameTitle: "The Chronicles of [Her Name]",
+    gameTitle: "The Chronicles of Elise",
     subtitle: "A Fantasy Quest",
 
     // Opening scroll text
     opening: {
         title: "Long ago, in a realm beyond time...",
-        text: `A hero arose in the mystical lands, destined for greatness.
+        text: `A hero arose in the mystical land of Santa Barbara, destined for greatness.
 
-This is the tale of courage, magic, and an epic journey
+This is the tale of a action, adventure, and love
 through realms both wondrous and perilous.
 
 The quest begins now...`,
@@ -22,14 +22,14 @@ The quest begins now...`,
         {
             chapterId: 0,
             title: "CHAPTER I",
-            subtitle: "The Meeting at Crossroads Inn",
+            subtitle: "The Meeting at Imperial Inn",
             narrative: `In the autumn of the Age of Discovery, fate brought
 two souls together at the fabled Crossroads Inn.
 The hero knew not that this chance encounter would
 change the course of destiny itself...`,
             personalMessage: `[Your personal message about meeting her -
 Make this heartfelt and specific to your story!]`,
-            photoPath: 'assets/story-scrolls/photo1.jpg', // Add your photo here
+            photoPath: 'assets/story-scrolls/IMG_9416.jpg', // Add your photo here
         },
         {
             chapterId: 1,

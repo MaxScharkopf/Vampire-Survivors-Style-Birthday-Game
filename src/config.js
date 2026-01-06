@@ -26,7 +26,7 @@ const GameConfig = {
         {
             id: 0,
             name: "The Meeting at Crossroads Inn",
-            duration: 300, // 5 minutes in seconds
+            duration: 20, // 5 minutes in seconds
             background: 'tavern',
             difficulty: 1.0,
         },
