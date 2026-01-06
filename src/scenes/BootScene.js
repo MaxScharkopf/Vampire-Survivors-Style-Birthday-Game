@@ -51,22 +51,24 @@ class BootScene extends Phaser.Scene {
             percentText.destroy();
         });
 
-        // Load assets here
-        // For now, we'll use generated graphics
-        // In production, you would load:
-        // - Background images for each chapter
-        // - Sound effects
-        // - Music
-        // - Story scroll images
+        // Load story scroll photos
+        // Load each photo from storyText.js
+        StoryData.scrolls.forEach(scroll => {
+            if (scroll.photoPath) {
+                const photoKey = 'photo_' + scroll.chapterId;
+                this.load.image(photoKey, scroll.photoPath);
+            }
+        });
 
-        // Placeholder for future asset loading:
+        // Optional: Load background images for chapters
         // this.load.image('background_tavern', 'assets/backgrounds/tavern.jpg');
         // this.load.image('background_forest', 'assets/backgrounds/forest.jpg');
         // this.load.image('background_cavern', 'assets/backgrounds/cavern.jpg');
         // this.load.image('background_garden', 'assets/backgrounds/garden.jpg');
+
+        // Optional: Load audio
         // this.load.audio('music_menu', 'assets/sounds/menu_music.mp3');
         // this.load.audio('music_chapter1', 'assets/sounds/chapter1_music.mp3');
-        // etc.
     }
 
     create() {

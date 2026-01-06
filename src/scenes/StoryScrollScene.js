@@ -186,18 +186,51 @@ class StoryScrollScene extends Phaser.Scene {
         });
         narrative.setOrigin(0.5, 0);
 
-        // Photo placeholder (or actual photo if loaded)
+        // Photo display
         const photoY = 360;
-        const photoBox = this.add.rectangle(width / 2, photoY, 300, 200, 0x000000, 0.3);
-        photoBox.setStrokeStyle(2, GameConfig.colors.gold, 1);
+        const photoKey = 'photo_' + scroll.chapterId;
+        let photo = null;
+        let photoBorder = null;
+        let photoBox = null;
 
-        const photoText = this.add.text(width / 2, photoY, '[Photo: ' + scroll.photoPath + ']', {
-            fontSize: '14px',
-            fontFamily: 'Georgia',
-            color: '#888888',
-            align: 'center',
-        });
-        photoText.setOrigin(0.5);
+        if (this.textures.exists(photoKey)) {
+            // Display the actual loaded photo
+            photo = this.add.image(width / 2, photoY, photoKey);
+
+            // Scale to fit nicely (max 400x300)
+            const maxWidth = 400;
+            const maxHeight = 300;
+            const scaleX = maxWidth / photo.width;
+            const scaleY = maxHeight / photo.height;
+            const scale = Math.min(scaleX, scaleY, 1); // Don't upscale
+            photo.setScale(scale);
+
+            // Add decorative border around photo
+            const borderPadding = 10;
+            const borderWidth = photo.displayWidth + borderPadding * 2;
+            const borderHeight = photo.displayHeight + borderPadding * 2;
+
+            photoBorder = this.add.graphics();
+            photoBorder.lineStyle(3, GameConfig.colors.gold, 1);
+            photoBorder.strokeRect(
+                width / 2 - borderWidth / 2,
+                photoY - borderHeight / 2,
+                borderWidth,
+                borderHeight
+            );
+        } else {
+            // Fallback: Show placeholder if image didn't load
+            photoBox = this.add.rectangle(width / 2, photoY, 300, 200, 0x000000, 0.3);
+            photoBox.setStrokeStyle(2, GameConfig.colors.gold, 1);
+
+            const photoText = this.add.text(width / 2, photoY, '[Photo: ' + scroll.photoPath + ']', {
+                fontSize: '14px',
+                fontFamily: 'Georgia',
+                color: '#888888',
+                align: 'center',
+            });
+            photoText.setOrigin(0.5);
+        }
 
         // Personal message
         const message = this.add.text(width / 2, 490, scroll.personalMessage, {
@@ -211,15 +244,29 @@ class StoryScrollScene extends Phaser.Scene {
         message.setOrigin(0.5, 0);
 
         // Fade in animation
-        const elements = [header, subtitle, separator, narrative, photoBox, photoText, message];
+        const elements = [header, subtitle, separator, narrative, message];
+
+        // Add photo elements if they exist
+        if (photo) {
+            elements.splice(4, 0, photo); // Insert photo before message
+            if (photoBorder) {
+                elements.splice(5, 0, photoBorder); // Insert border after photo
+            }
+        }
+        if (photoBox) {
+            elements.splice(4, 0, photoBox); // Insert photoBox before message
+        }
+
         elements.forEach((el, index) => {
-            el.setAlpha(0);
-            this.tweens.add({
-                targets: el,
-                alpha: 1,
-                duration: 800,
-                delay: index * 200,
-            });
+            if (el) { // Only animate if element exists
+                el.setAlpha(0);
+                this.tweens.add({
+                    targets: el,
+                    alpha: 1,
+                    duration: 800,
+                    delay: index * 200,
+                });
+            }
         });
     }
 
