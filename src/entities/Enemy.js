@@ -73,7 +73,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     update(player) {
-        if (!this.active || !player || !player.active) return;
+        // Don't update if dead, inactive, or no player
+        if (!this.active || this.currentHealth <= 0 || !player || !player.active) return;
 
         // Update stun
         if (this.stunned) {
@@ -104,6 +105,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     takeDamage(amount) {
+        // Don't take damage if already dead or inactive
+        if (!this.active || this.currentHealth <= 0) return;
+
         this.currentHealth -= amount;
         this.damageFlashTimer = 100;
         this.setTint(0xFF8888);
@@ -138,12 +142,12 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateHealthBar() {
-        if (!this.healthBar) return;
+        if (!this.healthBar || !this.active || this.currentHealth <= 0) return;
 
         this.healthBar.clear();
 
         // Only show health bar if damaged
-        if (this.currentHealth < this.maxHealth) {
+        if (this.currentHealth < this.maxHealth && this.currentHealth > 0) {
             const barWidth = 40;
             const barHeight = 4;
             const x = this.x - barWidth / 2;
@@ -161,6 +165,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     die() {
+        // Mark as inactive immediately to prevent further updates
+        this.setActive(false);
+        this.setVisible(false);
+
         // Drop XP crystals
         const xpCount = Math.ceil(this.xpValue);
         for (let i = 0; i < xpCount; i++) {
@@ -170,8 +178,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.scene.xpCrystals.add(crystal);
         }
 
-        // Death particle effect
-        this.scene.add.particles(this.x, this.y, this.texture.key, {
+        // Death particle effect with auto-cleanup
+        const particles = this.scene.add.particles(this.x, this.y, this.texture.key, {
             speed: { min: 50, max: 150 },
             scale: { start: 1, end: 0 },
             alpha: { start: 1, end: 0 },
@@ -180,11 +188,20 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             tint: this.enemyColor,
         });
 
-        // Cleanup
+        // Destroy particle emitter after particles finish
+        this.scene.time.delayedCall(700, () => {
+            if (particles) {
+                particles.destroy();
+            }
+        });
+
+        // Cleanup health bar
         if (this.healthBar) {
             this.healthBar.destroy();
+            this.healthBar = null;
         }
 
+        // Destroy the enemy sprite
         this.destroy();
     }
 
