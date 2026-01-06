@@ -26,28 +26,28 @@ const GameConfig = {
         {
             id: 0,
             name: "The Meeting at Crossroads Inn",
-            duration: 20, // 5 minutes in seconds
+            duration: 20, // seconds - for testing (change to 240-300 for final)
             background: 'tavern',
             difficulty: 1.0,
         },
         {
             id: 1,
             name: "Journey Through the Whispering Woods",
-            duration: 300,
+            duration: 20, // seconds - for testing (change to 240-300 for final)
             background: 'forest',
             difficulty: 1.3,
         },
         {
             id: 2,
             name: "Trials of the Crystal Caverns",
-            duration: 300,
+            duration: 20, // seconds - for testing (change to 240-300 for final)
             background: 'cavern',
             difficulty: 1.6,
         },
         {
             id: 3,
             name: "The Eternal Gardens",
-            duration: 300,
+            duration: 20, // seconds - for testing (change to 240-300 for final)
             background: 'garden',
             difficulty: 2.0,
         },
