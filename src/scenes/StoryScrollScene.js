@@ -9,6 +9,10 @@ class StoryScrollScene extends Phaser.Scene {
         this.nextScene = data.nextScene;
         this.nextChapterId = data.chapterId;
         this.playerData = data.playerData; // Player stats to pass to next scene
+
+        // Initialize flags
+        this.canContinue = false;
+        this.transitioning = false;
     }
 
     create() {
@@ -24,26 +28,30 @@ class StoryScrollScene extends Phaser.Scene {
             this.showChapterScroll(this.scrollType);
         }
 
-        // Allow skipping immediately (for people who read fast or have seen it before)
-        let canContinue = false;
+        // Allow skipping after 1 second (for people who read fast or have seen it before)
         this.time.delayedCall(1000, () => {
-            canContinue = true;
+            this.canContinue = true;
+            console.log('StoryScroll: Can now continue');
         });
 
+        // Input handlers
         this.input.on('pointerdown', () => {
-            if (canContinue) {
+            console.log('StoryScroll: Pointer clicked, canContinue =', this.canContinue);
+            if (this.canContinue) {
                 this.continueToNextScene();
             }
         });
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            if (canContinue) {
+            console.log('StoryScroll: SPACE pressed, canContinue =', this.canContinue);
+            if (this.canContinue) {
                 this.continueToNextScene();
             }
         });
 
         this.input.keyboard.on('keydown-ENTER', () => {
-            if (canContinue) {
+            console.log('StoryScroll: ENTER pressed, canContinue =', this.canContinue);
+            if (this.canContinue) {
                 this.continueToNextScene();
             }
         });
@@ -292,20 +300,28 @@ class StoryScrollScene extends Phaser.Scene {
     }
 
     continueToNextScene() {
+        console.log('StoryScroll: continueToNextScene called, transitioning =', this.transitioning);
+
         // Prevent multiple calls
-        if (this.transitioning) return;
+        if (this.transitioning) {
+            console.log('StoryScroll: Already transitioning, ignoring');
+            return;
+        }
         this.transitioning = true;
 
+        console.log('StoryScroll: Starting transition to', this.nextScene);
         this.cameras.main.fadeOut(500);
 
         this.time.delayedCall(500, () => {
             if (this.nextScene === 'GameScene') {
+                console.log('StoryScroll: Starting GameScene with chapter', this.nextChapterId);
                 this.scene.start('GameScene', {
                     chapterId: this.nextChapterId,
                     playerData: this.playerData,
                     continue: this.playerData !== undefined && this.playerData !== null,
                 });
             } else {
+                console.log('StoryScroll: Starting scene', this.nextScene);
                 this.scene.start(this.nextScene);
             }
         });
