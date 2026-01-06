@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chronicles - A Fantasy Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a0f1f;
+            background: linear-gradient(135deg, #1a0f1f 0%, #2d1b3d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 3px solid #8b7355;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid #ffd700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading the Chronicles...</div>
+        </div>
+    </div>
+
+    <!-- Phaser 3 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+
+    <!-- Game Source Files -->
+    <script src="src/config.js"></script>
+    <script src="src/data/storyText.js"></script>
+    <script src="src/data/abilityData.js"></script>
+    <script src="src/data/enemyData.js"></script>
+    <script src="src/entities/Projectile.js"></script>
+    <script src="src/entities/Ability.js"></script>
+    <script src="src/entities/Player.js"></script>
+    <script src="src/entities/Enemy.js"></script>
+    <script src="src/entities/XPCrystal.js"></script>
+    <script src="src/managers/SpawnManager.js"></script>
+    <script src="src/managers/UpgradeManager.js"></script>
+    <script src="src/scenes/BootScene.js"></script>
+    <script src="src/scenes/MenuScene.js"></script>
+    <script src="src/scenes/GameScene.js"></script>
+    <script src="src/scenes/LevelUpScene.js"></script>
+    <script src="src/scenes/StoryScrollScene.js"></script>
+    <script src="src/scenes/GameOverScene.js"></script>
+    <script src="src/scenes/VictoryScene.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

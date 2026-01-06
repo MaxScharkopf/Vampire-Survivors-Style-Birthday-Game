@@ -1,0 +1,27 @@
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies (if added later)
+node_modules/
+package-lock.json
+
+# Build output (if added later)
+dist/
+build/
+
+# Personal photos (optional - remove this if you want to commit photos)
+# assets/story-scrolls/*.jpg
+# assets/story-scrolls/*.png
